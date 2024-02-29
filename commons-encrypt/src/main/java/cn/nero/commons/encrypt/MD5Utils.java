@@ -48,18 +48,4 @@ public class MD5Utils {
         return result.equals(md5);
     }
 
-    public static void main(String[] args) {
-        String origin = md5("Hello World");
-        System.out.println("origin : " + origin);
-
-        String salt = RandomUtils.simpleRandom(8);
-        String hasSalt = md5Salt(salt, "Hello World");
-        System.out.println("hasSalt : " + hasSalt);
-
-        boolean verify = verify(hasSalt, "Hello World", salt);
-        System.out.println("verify : " + verify);
-
-
-    }
-
 }

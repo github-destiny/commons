@@ -68,8 +68,4 @@ public class RandomUtils {
         return random(simpleSeed(), length);
     }
 
-    public static void main(String[] args) {
-        System.out.println(RandomUtils.simpleRandom());
-    }
-
 }

@@ -40,6 +40,14 @@ public class RandomUtils {
         return sb.toString();
     }
 
+    public static String simpleSeedNoSymbol () {
+        StringBuilder sb = new StringBuilder();
+        sb.append(SEED_OF_NUMBER);
+        sb.append(SEED_OF_LOWER_CASE_LETTER);
+        sb.append(SEED_OF_UPPER_CASE_LETTER);
+        return sb.toString();
+    }
+
     public static String random () {
         return random(DEFAULT_LENGTH);
     }

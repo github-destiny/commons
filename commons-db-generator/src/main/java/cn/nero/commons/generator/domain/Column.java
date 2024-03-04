@@ -6,8 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
-import java.sql.JDBCType;
-
 /**
  * @author Nero Claudius
  * @version 1.0.0
@@ -24,7 +22,7 @@ public class Column {
 
     private String dataType;
 
-    private JDBCType jdbcType;
+    private String javaType;
 
     private String columnComment;
 

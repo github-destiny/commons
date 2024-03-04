@@ -6,6 +6,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
+<#if hasLocalDateTime>
+import java.time.LocalDateTime;
+</#if>
+<#if hasLocalDate>
+import java.time.LocalDateTime;
+</#if>
+
+
 /**
 * @author Nero Claudius
 * @version 1.0.0
@@ -16,12 +24,11 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(chain = true)
-public class ${tableName} {
+public class ${tableName}PO {
 
     <#list columns as column>
-
         /**
-         * ${column.comment}
+         * ${column.columnComment}
          */
         private ${column.javaType} ${column.columnName};
 

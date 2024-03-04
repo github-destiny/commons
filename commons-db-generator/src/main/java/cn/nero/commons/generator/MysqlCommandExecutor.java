@@ -1,15 +1,20 @@
 package cn.nero.commons.generator;
 
+import cn.nero.commons.generator.constant.JavaTypeEnums;
 import cn.nero.commons.generator.domain.Column;
 import cn.nero.commons.generator.domain.Table;
 import com.alibaba.fastjson2.JSON;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateExceptionHandler;
 import lombok.Setter;
+import lombok.SneakyThrows;
 
+import java.io.File;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.stream.Collectors;
 
@@ -79,6 +84,7 @@ public class MysqlCommandExecutor {
                 table.setComment(tableComment);
 
                 List<Column> columns = getColumnsByTableName(tableSchema, tableName);
+                table.setColumns(columns);
 
                 tables.add(table);
             }
@@ -96,7 +102,7 @@ public class MysqlCommandExecutor {
                 .collect(Collectors.joining());
     }
 
-    public List<Column> getColumnsByTableName (Table table) throws InterruptedException {
+    public List<Column> getColumnsByTableName(Table table) throws InterruptedException {
         return getColumnsByTableName(table.getSchema(), table.getName());
     }
 
@@ -116,9 +122,10 @@ public class MysqlCommandExecutor {
 
                 Column column = new Column();
                 column.setColumnName(formatField(columnName));
-                column.setDataType(formatField(dataType));
-                column.setColumnComment(formatField(columnComment));
-                column.setColumnKey(formatField(columnKey));
+                column.setDataType(dataType);
+                column.setColumnComment(columnComment);
+                column.setColumnKey(columnKey);
+                column.setJavaType(JavaTypeEnums.fromMysqlType(dataType).getJavaType());
                 columns.add(column);
 
             }
@@ -130,16 +137,32 @@ public class MysqlCommandExecutor {
         return columns;
     }
 
+    @SneakyThrows
     public static void main(String[] args) {
         String url = "jdbc:mysql://localhost:3306/user";
         String username = "root";
         String password = "2018023931";
         MysqlCommandExecutor executor = new MysqlCommandExecutor(url, username, password);
         try {
-            List<Table> user = executor.getTablesByDatabaseName("user");
-            List<Column> columns = executor.getColumnsByTableName("user", "user_info");
-            System.out.println(JSON.toJSONString(columns));
+            List<Table> tables = executor.getTablesByDatabaseName("user");
+            //System.out.println(JSON.toJSONString(tables));
 
+            Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
+            cfg.setDirectoryForTemplateLoading(new File(System.getProperty("user.dir") + "/commons-db-generator" + "/src/main/resources/ftls"));
+            cfg.setDefaultEncoding("UTF-8");
+            cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+
+            Table table = tables.get(0);
+            Map<String, Object> map = new HashMap<>();
+            map.put("tableName", table.getName());
+            map.put("columns", table.getColumns());
+            map.put("package", "cn.nero.commons.generator.domain.po");
+            map.put("hasLocalDateTime", table.getHasLocalDateTime());
+            map.put("hasLocalDate", table.getHasLocalDate());
+
+            Template template = cfg.getTemplate("entity-po.java.ftl");
+            Writer out = new OutputStreamWriter(System.out);
+            template.process(map, out);
         } catch (InterruptedException | SQLException e) {
             throw new RuntimeException(e);
         }

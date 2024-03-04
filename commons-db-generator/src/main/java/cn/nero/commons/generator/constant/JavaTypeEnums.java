@@ -2,7 +2,6 @@ package cn.nero.commons.generator.constant;
 
 import lombok.Getter;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Set;
 
@@ -34,9 +33,6 @@ public enum JavaTypeEnums {
     }
 
     public static JavaTypeEnums fromMysqlType(String mysqlType) {
-
-        LocalDateTime.now();
-
         return Arrays.stream(JavaTypeEnums.class.getEnumConstants())
                 .filter(type -> type.getMysqlTypes().contains(mysqlType))
                 .findFirst()

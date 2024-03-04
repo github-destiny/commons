@@ -8,7 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import java.util.List;
-import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author Nero Claudius
@@ -36,9 +37,16 @@ public class Table {
 
     public void setColumns(List<Column> columns) {
         this.columns = columns;
-        columns.stream()
-                .filter(column -> JavaTypeEnums.LOCAL_DATE.getMysqlTypes().contains(column.getDataType()))
-                .map(Objects::nonNull).findFirst().get();
+        Set<String> dataTypes = this.columns.stream().map(Column::getDataType).collect(Collectors.toSet());
+        dataTypes.forEach(type -> {
+            if (JavaTypeEnums.LOCAL_DATE_TIME.getMysqlTypes().contains(type)) {
+                this.hasLocalDateTime = true;
+            }
+
+            if (JavaTypeEnums.LOCAL_DATE.getMysqlTypes().contains(type)) {
+                this.hasLocalDate = true;
+            }
+        });
     }
 
 }

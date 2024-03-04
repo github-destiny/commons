@@ -1,13 +1,13 @@
 package cn.nero.commons.generator;
 
-import cn.nero.commons.generator.domain.Column;
-import freemarker.template.Configuration;
-import freemarker.template.TemplateExceptionHandler;
+import com.google.common.base.Joiner;
 import lombok.Setter;
+import lombok.SneakyThrows;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.List;
+import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 
 /**
  * @author Nero Claudius
@@ -17,25 +17,59 @@ import java.util.List;
 @Setter
 public class EntityGenerator {
 
-    private String path;
+    /**
+     * 模块名
+     */
     private String module;
 
-    private static final String SOURCE_PATH = "src/main/java";
+    /**
+     * 包名
+     * e.g. com.example
+     */
+    private String parent;
 
-    public static void main(String[] args) throws IOException, InterruptedException {
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
-        cfg.setDirectoryForTemplateLoading(new File(System.getProperty("user.dir") + "/commons-db-generator/src/main/resources" + "/ftls"));
-        cfg.setDefaultEncoding("UTF-8");
-        cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+    /**
+     * 类路径
+     */
+    private String sourcePath;
 
-        String url = "jdbc:mysql://localhost:3306/user";
-        String username = "root";
-        String password = "2018023931";
+    /**
+     * 输出文件名
+     */
+    private String fileName;
 
-        MysqlCommandExecutor executor = new MysqlCommandExecutor(url, username, password);
-        List<Column> columns = executor.getColumnsByTableName("user", "user_info");
+    /**
+     * 文件内容
+     */
+    private String content;
 
+    public static void generateFile (String module, String parent, String fileName, String content) {
+        generateFile(module, parent, "/src/main/java/", fileName, content);
+    }
 
+    @SneakyThrows
+    public static void generateFile(String module, String parent, String sourcePath, String fileName, String content) {
+
+        String path = Joiner.on("/").join(parent.split("\\."));
+        String generatePath = System.getProperty("user.dir") + "/" + module + sourcePath + "/" + path + "/" + fileName;
+
+        File file = new File(generatePath);
+        if (!file.exists()) {
+            RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
+            FileChannel channel = randomAccessFile.getChannel();
+            ByteBuffer buffer = ByteBuffer.wrap(content.getBytes());
+
+            while (buffer.hasRemaining()) {
+                channel.write(buffer);
+            }
+
+            channel.close();
+            randomAccessFile.close();
+        }
+    }
+
+    public static void main(String[] args) {
+        EntityGenerator.generateFile("commons-db-generator", "cn.nero.commons.generator.domain", "text.txt", "你好谢谢小笼包再见111");
     }
 
 }

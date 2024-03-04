@@ -3,19 +3,24 @@ package cn.nero.commons.generator;
 import cn.nero.commons.generator.constant.JavaTypeEnums;
 import cn.nero.commons.generator.domain.Column;
 import cn.nero.commons.generator.domain.Table;
-import com.alibaba.fastjson2.JSON;
+import cn.nero.commons.helper.WordHelper;
+import com.google.common.base.Joiner;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateExceptionHandler;
 import lombok.Setter;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
-import java.io.OutputStreamWriter;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.sql.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -25,6 +30,8 @@ import java.util.stream.Collectors;
  */
 @Setter
 public class MysqlCommandExecutor {
+
+    private static final Logger LOGGER = Logger.getLogger(MysqlCommandExecutor.class.getName());
 
     private String url;
     private String username;
@@ -97,7 +104,7 @@ public class MysqlCommandExecutor {
     private String formatField(String columnName) {
         String[] words = columnName.split("_");
         return words[0] + Arrays.stream(words)
-                .map(word -> Objects.nonNull(word) && word.length() > 0 ? Character.toUpperCase(word.charAt(0)) + word.substring(1) : "")
+                .map(word -> Objects.nonNull(word) && !word.isEmpty() ? Character.toUpperCase(word.charAt(0)) + word.substring(1) : "")
                 .skip(1)
                 .collect(Collectors.joining());
     }
@@ -154,15 +161,28 @@ public class MysqlCommandExecutor {
 
             Table table = tables.get(0);
             Map<String, Object> map = new HashMap<>();
-            map.put("tableName", table.getName());
+            map.put("tableName", WordHelper.underline2ClassName(table.getName()));
             map.put("columns", table.getColumns());
             map.put("package", "cn.nero.commons.generator.domain.po");
             map.put("hasLocalDateTime", table.getHasLocalDateTime());
             map.put("hasLocalDate", table.getHasLocalDate());
 
+            String formattedLocalDate = DateTimeFormatter.ofPattern("yyyy/MM/dd").format(LocalDate.now());
+
+            map.put("author", "Nero Claudius");
+            map.put("currentDate", formattedLocalDate);
+
             Template template = cfg.getTemplate("entity-po.java.ftl");
-            Writer out = new OutputStreamWriter(System.out);
-            template.process(map, out);
+            Writer writer = new StringWriter();
+            template.process(map, writer);
+
+            String module = "commons-db-generator";
+            String parent = "cn.nero.commons.generator.domain";
+            String fileName = WordHelper.underline2ClassName(table.getName()) + "PO.java";
+            EntityGenerator.generateFile(module, parent, fileName, writer.toString());
+
+            LOGGER.info("生成文件成功!");
+
         } catch (InterruptedException | SQLException e) {
             throw new RuntimeException(e);
         }

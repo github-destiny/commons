@@ -11,6 +11,7 @@
   <modules>
     <module>commons-encrypt</module>
     <module>commons-db-generator</module>
+      <module>commons-helper</module>
   </modules>
 
   <properties>

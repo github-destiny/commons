@@ -46,6 +46,12 @@
             <artifactId>guava</artifactId>
             <version>33.0.0-jre</version>
         </dependency>
+
+        <dependency>
+            <groupId>cn.nero</groupId>
+            <artifactId>commons-helper</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
 </project>

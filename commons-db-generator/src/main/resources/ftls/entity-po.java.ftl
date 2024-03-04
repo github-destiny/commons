@@ -15,9 +15,9 @@ import java.time.LocalDateTime;
 
 
 /**
-* @author Nero Claudius
+* @author ${author}
 * @version 1.0.0
-* @since 2024/3/1
+* @since ${currentDate}
 */
 @Data
 @Builder
@@ -27,10 +27,10 @@ import java.time.LocalDateTime;
 public class ${tableName}PO {
 
     <#list columns as column>
-        /**
-         * ${column.columnComment}
-         */
-        private ${column.javaType} ${column.columnName};
+    /**
+     * ${column.columnComment}
+     */
+    private ${column.javaType} ${column.columnName};
 
     </#list>
 

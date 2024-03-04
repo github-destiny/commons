@@ -3,6 +3,7 @@ package cn.nero.commons.generator;
 import com.google.common.base.Joiner;
 import lombok.Setter;
 import lombok.SneakyThrows;
+import org.checkerframework.checker.units.qual.C;
 
 import java.io.File;
 import java.io.RandomAccessFile;
@@ -44,28 +45,25 @@ public class EntityGenerator {
     private String content;
 
     public static void generateFile (String module, String parent, String fileName, String content) {
-        generateFile(module, parent, "/src/main/java/", fileName, content);
+        generateFile(module, parent, "\\src\\main\\java", fileName, content);
     }
-
     @SneakyThrows
     public static void generateFile(String module, String parent, String sourcePath, String fileName, String content) {
 
-        String path = Joiner.on("/").join(parent.split("\\."));
-        String generatePath = System.getProperty("user.dir") + "/" + module + sourcePath + "/" + path + "/" + fileName;
+        String path = Joiner.on("\\").join(parent.split("\\."));
+        String generatePath = System.getProperty("user.dir") + "\\" + module + sourcePath + "\\" + path + "\\" + fileName;
 
         File file = new File(generatePath);
-        if (!file.exists()) {
-            RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
-            FileChannel channel = randomAccessFile.getChannel();
-            ByteBuffer buffer = ByteBuffer.wrap(content.getBytes());
+        RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
+        FileChannel channel = randomAccessFile.getChannel();
+        ByteBuffer buffer = ByteBuffer.wrap(content.getBytes());
 
-            while (buffer.hasRemaining()) {
-                channel.write(buffer);
-            }
-
-            channel.close();
-            randomAccessFile.close();
+        while (buffer.hasRemaining()) {
+            channel.write(buffer);
         }
+
+        channel.close();
+        randomAccessFile.close();
     }
 
     public static void main(String[] args) {

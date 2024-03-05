@@ -19,8 +19,8 @@ public enum JavaTypeEnums {
     STRING("String", Set.of("char", "varchar", "text", "json")),
     INTEGER("Integer", Set.of("tinyint", "int")),
     LONG("Long", Set.of("bigint")),
-    LOCAL_DATE_TIME("java.time.LocalDateTime", Set.of("datetime", "timestamp")),
-    LOCAL_DATE("java.time.LocalDate", Set.of("date"))
+    LOCAL_DATE_TIME("LocalDateTime", Set.of("datetime", "timestamp")),
+    LOCAL_DATE("LocalDate", Set.of("date"))
     ;
 
     private String javaType;

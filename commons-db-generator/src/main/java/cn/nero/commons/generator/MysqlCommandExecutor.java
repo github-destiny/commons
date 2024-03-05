@@ -4,15 +4,15 @@ import cn.nero.commons.generator.constant.JavaTypeEnums;
 import cn.nero.commons.generator.domain.Column;
 import cn.nero.commons.generator.domain.Table;
 import cn.nero.commons.helper.WordHelper;
-import com.google.common.base.Joiner;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 import lombok.Setter;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.sql.*;
@@ -159,29 +159,35 @@ public class MysqlCommandExecutor {
             cfg.setDefaultEncoding("UTF-8");
             cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
 
-            Table table = tables.get(0);
-            Map<String, Object> map = new HashMap<>();
-            map.put("tableName", WordHelper.underline2ClassName(table.getName()));
-            map.put("columns", table.getColumns());
-            map.put("package", "cn.nero.commons.generator.domain.po");
-            map.put("hasLocalDateTime", table.getHasLocalDateTime());
-            map.put("hasLocalDate", table.getHasLocalDate());
+            tables.forEach(table -> {
+                Map<String, Object> map = new HashMap<>(16);
+                map.put("tableName", WordHelper.underline2ClassName(table.getName()));
+                map.put("columns", table.getColumns());
+                map.put("package", "cn.nero.commons.generator.domain.user.po");
+                map.put("hasLocalDateTime", table.getHasLocalDateTime());
+                map.put("hasLocalDate", table.getHasLocalDate());
 
-            String formattedLocalDate = DateTimeFormatter.ofPattern("yyyy/MM/dd").format(LocalDate.now());
+                String formattedLocalDate = DateTimeFormatter.ofPattern("yyyy/MM/dd").format(LocalDate.now());
 
-            map.put("author", "Nero Claudius");
-            map.put("currentDate", formattedLocalDate);
+                map.put("author", "Nero Claudius");
+                map.put("currentDate", formattedLocalDate);
 
-            Template template = cfg.getTemplate("entity-po.java.ftl");
-            Writer writer = new StringWriter();
-            template.process(map, writer);
+                Writer writer = null;
+                try {
+                    Template template = cfg.getTemplate("entity-po.java.ftl");
+                    writer = new StringWriter();
+                    template.process(map, writer);
+                } catch (IOException | TemplateException e) {
+                    throw new RuntimeException(e);
+                }
 
-            String module = "commons-db-generator";
-            String parent = "cn.nero.commons.generator.domain";
-            String fileName = WordHelper.underline2ClassName(table.getName()) + "PO.java";
-            EntityGenerator.generateFile(module, parent, fileName, writer.toString());
+                String module = "commons-db-generator";
+                String parent = "cn.nero.commons.generator.domain.user.po";
+                String fileName = WordHelper.underline2ClassName(table.getName()) + "PO.java";
+                FileGenerator.generateFile(module, parent, fileName, writer.toString());
 
-            LOGGER.info("生成文件成功!");
+                LOGGER.info("文件名: " +  WordHelper.underline2ClassName(table.getName()) + "生成文件成功!");
+            });
 
         } catch (InterruptedException | SQLException e) {
             throw new RuntimeException(e);

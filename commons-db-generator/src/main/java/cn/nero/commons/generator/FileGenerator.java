@@ -3,7 +3,6 @@ package cn.nero.commons.generator;
 import com.google.common.base.Joiner;
 import lombok.Setter;
 import lombok.SneakyThrows;
-import org.checkerframework.checker.units.qual.C;
 
 import java.io.File;
 import java.io.RandomAccessFile;
@@ -16,7 +15,7 @@ import java.nio.channels.FileChannel;
  * @since 2024/3/1
  */
 @Setter
-public class EntityGenerator {
+public class FileGenerator {
 
     /**
      * 模块名
@@ -47,11 +46,21 @@ public class EntityGenerator {
     public static void generateFile (String module, String parent, String fileName, String content) {
         generateFile(module, parent, "\\src\\main\\java", fileName, content);
     }
+
     @SneakyThrows
     public static void generateFile(String module, String parent, String sourcePath, String fileName, String content) {
 
         String path = Joiner.on("\\").join(parent.split("\\."));
-        String generatePath = System.getProperty("user.dir") + "\\" + module + sourcePath + "\\" + path + "\\" + fileName;
+
+        String dirPath = System.getProperty("user.dir") + "\\" + module + sourcePath + "\\" + path;
+
+        File dirFile = new File(dirPath);
+
+        if (!dirFile.exists()) {
+            dirFile.mkdirs();
+        }
+
+        String generatePath = dirPath + "\\" + fileName;
 
         File file = new File(generatePath);
         RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
@@ -67,7 +76,7 @@ public class EntityGenerator {
     }
 
     public static void main(String[] args) {
-        EntityGenerator.generateFile("commons-db-generator", "cn.nero.commons.generator.domain", "text.txt", "你好谢谢小笼包再见111");
+        FileGenerator.generateFile("commons-db-generator", "cn.nero.commons.generator.domain", "text.txt", "你好谢谢小笼包再见111");
     }
 
 }
